@@ -19,8 +19,6 @@ Your project goal is to operationalize this working, machine learning microservi
 
 You can find a detailed [project rubric, here](https://review.udacity.com/#!/rubrics/2576/view).
 
-CI/CD: success [here](https://app.circleci.com/pipelines/github/nvnhann/Operationalize-a-Machine-Learning-Microservice-API/1/workflows/7a2e0d09-fa1c-4695-ba98-01316d297de6/jobs/1)
-
 **The final implementation of the project will showcase your abilities to operationalize production microservices.**
 
 ---
@@ -36,6 +34,43 @@ python3 -m pip install --user virtualenv
 python3 -m virtualenv --python=<path-to-Python3.7> .devops
 source .devops/bin/activate
 ```
+
+### ```run_docker.sh```
+
+Sure, let me explain each part of the script:
+
+- `#!/usr/bin/env bash`: This is called a "shebang" line. It tells the system which interpreter to use to execute the script. In this case, it specifies that the script should be executed using the Bash shell (`/bin/bash`), which is commonly available on Unix-like systems.
+
+- `docker build --tag=project3 .`: This command is used to build a Docker image. It creates an image based on the contents of the current directory (`.`) and adds a descriptive tag to the image. The tag in this case is `project3`, which will be used to identify the image later.
+
+- `docker images list`: This line seems to be incorrect. It should be `docker images` instead of `docker images list`. The command `docker images` lists all the Docker images available on your system.
+
+- `docker run -p 8000:80 project3`: This command runs a Docker container based on the previously built image (`project3`). It maps port 8000 on your host machine to port 80 inside the container. This means that when you access `http://localhost:8000` in your web browser, the traffic will be forwarded to the container's port 80, where the Flask app is running.
+
+### ```run_kubernetes.sh```
+
+- `dockerpath="nvnhan/project3"`: This line assigns the Docker image path to the variable `dockerpath`. In this case, the image is intended to be pushed to the Docker Hub repository with the path `nvnhan/project3`.
+
+- `kubectl run project3 --generator=run-pod/v1 --image=$dockerpath --port=80 --labels "app=project3"`: This command is using `kubectl` (Kubernetes command-line tool) to deploy a pod in a Kubernetes cluster. Here's what each option does:
+  - `kubectl run project3`: This specifies the name of the deployment, which is `project3`.
+  - `--generator=run-pod/v1`: This is specifying the generator to use, indicating a basic pod deployment.
+  - `--image=$dockerpath`: This specifies the Docker image to use for the pod, which is defined by the previously set `dockerpath` variable.
+  - `--port=80`: This specifies that the container inside the pod will be listening on port 80.
+  - `--labels "app=project3"`: This assigns the label `app=project3` to the pod, which can be used for organizing and identifying pods.
+
+- `kubectl get pods`: This command lists the pods in the Kubernetes cluster. After running the previous command to deploy the pod, this step is likely included to show the status of the newly deployed pod.
+
+- `kubectl port-forward project3 8000:80`: This command sets up port forwarding, allowing you to access the pod's port 80 on your local machine's port 8000. This way, when you access `http://localhost:8000` in your web browser, the traffic will be forwarded to the pod's port 80, where your application is running.
+
+###```upload_docker.sh```
+
+- `echo "Docker ID and Image: $dockerpath"`: This line prints a message indicating the Docker ID and Image that will be used in the subsequent steps.
+
+- `docker login`: This command prompts the user to log in to their Docker Hub account, enabling them to push images to the Docker Hub repository.
+
+- `docker image tag project3 $dockerpath`: This command tags the locally built Docker image `project3` with the specified `dockerpath`. This is necessary to ensure that the image is properly identified when pushing to the Docker Hub repository.
+
+- `docker push $dockerpath`: This command pushes the tagged Docker image to the specified Docker Hub repository using the previously set `dockerpath`.
 
 ### Makefile
 
@@ -55,10 +90,7 @@ This `Makefile` is used to automate the setup, installation of dependencies, tes
 
 Overall, this `Makefile` simplifies the development workflow by providing easy-to-use commands to set up the environment, install dependencies, run tests, and perform linting checks. Developers can simply use `make` followed by the desired target to automate these tasks.
 
-
 * Run `make install` to install the necessary dependencies
-
-
 
 ### Running `app.py`
 
@@ -69,19 +101,6 @@ Overall, this `Makefile` simplifies the development workflow by providing easy-t
 ### Kubernetes Steps
 
 * Setup and Configure Docker locally
-
-```
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-```
-
 * Setup and Configure Kubernetes locally
-```shell
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/
-```
 * Create Flask app in Container
-`./run_docker.sh`
 * Run via kubectl
-`./run_kubernetes.sh`
