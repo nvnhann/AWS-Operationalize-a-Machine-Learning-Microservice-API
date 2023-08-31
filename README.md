@@ -19,6 +19,8 @@ Your project goal is to operationalize this working, machine learning microservi
 
 You can find a detailed [project rubric, here](https://review.udacity.com/#!/rubrics/2576/view).
 
+CI/CD: success [here](https://app.circleci.com/pipelines/github/nvnhann/Operationalize-a-Machine-Learning-Microservice-API/1/workflows/7a2e0d09-fa1c-4695-ba98-01316d297de6/jobs/1)
+
 **The final implementation of the project will showcase your abilities to operationalize production microservices.**
 
 ---
@@ -34,7 +36,29 @@ python3 -m pip install --user virtualenv
 python3 -m virtualenv --python=<path-to-Python3.7> .devops
 source .devops/bin/activate
 ```
+
+### Makefile
+
+This `Makefile` is used to automate the setup, installation of dependencies, testing, and linting processes for a project. It provides convenient commands that developers can use to perform common tasks without remembering the exact commands required. Here's a breakdown of the targets and their functionalities:
+
+- `setup`: This target is responsible for setting up the project environment. It creates a Python virtual environment using `python3.7 -m venv ~/.devops`. This is a common practice to isolate project dependencies from the system-wide Python installation.
+
+- `install`: This target installs project dependencies specified in the `requirements.txt` file. It uses the `pip install` command to upgrade `pip` and install the required packages.
+
+- `test`: This target is intended for running tests on the project. In the example, it contains comments showing how additional tests could be added, like running tests with `pytest` or testing Jupyter notebooks using `nbval`.
+
+- `lint`: This target performs linting checks on the project files. It uses two linters:
+  - `hadolint` to lint the Dockerfile. `hadolint` is a linter for Dockerfiles, and it helps ensure best practices in Dockerfile creation.
+  - `pylint` to lint the Python source code. `pylint` is a widely used Python linter that checks for code quality and coding style.
+
+- `all`: This is the default target that developers can run with the `make` command without specifying a target explicitly. It combines the `install`, `lint`, and `test` targets. This way, you can quickly run all the necessary steps to prepare, lint, and test the project.
+
+Overall, this `Makefile` simplifies the development workflow by providing easy-to-use commands to set up the environment, install dependencies, run tests, and perform linting checks. Developers can simply use `make` followed by the desired target to automate these tasks.
+
+
 * Run `make install` to install the necessary dependencies
+
+
 
 ### Running `app.py`
 
@@ -45,6 +69,19 @@ source .devops/bin/activate
 ### Kubernetes Steps
 
 * Setup and Configure Docker locally
+
+```
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+```
+
 * Setup and Configure Kubernetes locally
+```shell
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+```
 * Create Flask app in Container
+`./run_docker.sh`
 * Run via kubectl
+`./run_kubernetes.sh`
